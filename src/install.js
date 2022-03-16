@@ -61,7 +61,7 @@ function mergeMethods(
         // 重名判断
         if (options.isFindCurrentCmp === true) {
             console.warn(
-                `组件出现重名super,这可能会导致调用父级混入方法出错!请确认~`,
+                `vue-supers:组件出现重名super,这可能会导致调用父级混入方法出错!请确认~`,
                 mixin
             );
         }
@@ -85,7 +85,15 @@ function mergeMethods(
             if (resultMethods[methodName] === "computed") {
                 resultMethods[methodName] = "computed_";
             } else if (resultMethods[methodName] === "computed_") {
-                resultMethods[methodName] = method.bind(this);
+                // 判断computed:set与get值情况
+                if(_.isPlainObject(method)) {
+                    resultMethods[methodName] = {
+                        get: _.isFunction(method.get) ? method.get.bind(this) : () => {},
+                        set: _.isFunction(method.set) ? method.set.bind(this) : () => {}
+                    }
+                } else if(_.isFunction(method)) {
+                    resultMethods[methodName] = method.bind(this);
+                }
             }
         });
     }
@@ -157,6 +165,14 @@ export default {
             // 合并方法
             let options = { isFindCurrentCmp: false };
             for (let i = extend.mixins.length - 1; i >= 0; i--) {
+                if (
+                    i === extend.mixins.length - 1 &&
+                    extend.mixins[i].SUPER === undefined
+                ) {
+                    console.warn(
+                        `vue-supers:未查询到调用$super函数本身组件的SUPER属性,请确认配置是否正确,这可能会导致调用父级函数出现失败~[SuperName]:${superName}`
+                    );
+                }
                 mergeMethods.call(
                     this,
                     extend.mixins[i],
