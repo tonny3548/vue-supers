@@ -86,12 +86,16 @@ function mergeMethods(
                 resultMethods[methodName] = "computed_";
             } else if (resultMethods[methodName] === "computed_") {
                 // 判断computed:set与get值情况
-                if(_.isPlainObject(method)) {
+                if (_.isPlainObject(method)) {
                     resultMethods[methodName] = {
-                        get: _.isFunction(method.get) ? method.get.bind(this) : () => {},
-                        set: _.isFunction(method.set) ? method.set.bind(this) : () => {}
-                    }
-                } else if(_.isFunction(method)) {
+                        get: _.isFunction(method.get)
+                            ? method.get.bind(this)
+                            : () => {},
+                        set: _.isFunction(method.set)
+                            ? method.set.bind(this)
+                            : () => {},
+                    };
+                } else if (_.isFunction(method)) {
                     resultMethods[methodName] = method.bind(this);
                 }
             }
@@ -112,15 +116,18 @@ function mergeMethods(
     }
 }
 
-export default {
+const Super = {
+    /** 是否警告提示 */
+    warn: true,
     /**
      * 安装函数
      * @description 通过Vue.use(...)使用注入$super
      * @param {object} Vue vue对象
      * @returns void
      */
-    install(Vue) {
+    install(Vue, { warn = true } = {}) {
         Vue.prototype.$super = this.super;
+        Super.warn = warn;
     },
     /**
      * 超类核心方法
@@ -167,7 +174,8 @@ export default {
             for (let i = extend.mixins.length - 1; i >= 0; i--) {
                 if (
                     i === extend.mixins.length - 1 &&
-                    extend.mixins[i].SUPER === undefined
+                    extend.mixins[i].SUPER === undefined &&
+                    Super.warn
                 ) {
                     console.warn(
                         `vue-supers:未查询到调用$super函数本身组件的SUPER属性,请确认配置是否正确,这可能会导致调用父级函数出现失败~[SuperName]:${superName}`
@@ -198,3 +206,5 @@ export default {
         }
     },
 };
+
+export default Super;
