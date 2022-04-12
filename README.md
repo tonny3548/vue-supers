@@ -146,3 +146,7 @@ console.log(new Parent().format);
 // 输出
 "undefined Parent Computed"
 ```
+
+## Git仓库
+
+[github](https://github.com/tonny3548/vue-supers)
