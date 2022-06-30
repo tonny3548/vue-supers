@@ -136,8 +136,19 @@ const Parent = Vue.extend({
   methods: {
     async test() {
       // 此处调用不会报错
-      await this.$super("Parent").test().catch(err => console.error(err))
+      const res = await this.$super("Parent").test().catch(err => console.error(err))
+      // 可以通过使用该变量判断父级是否为空
+      if(res.$empty) {
+        console.log("父级不存在对应的函数")
+      }
       // dosomething
+    }
+    // 判断空的调用方法2
+    test2() {
+        const res = this.$super("Parent").test2();
+        if(res.$empty) {
+            console.log("父级不存在对应的函数")
+        }
     }
   }
 });
