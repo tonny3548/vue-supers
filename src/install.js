@@ -193,9 +193,11 @@ const Super = {
             // 空函数赋值
             _.forEach(resultMethods, (method, methodName) => {
                 if (method === "methods" || method === "methods_") {
-                    resultMethods[methodName] = (() => Promise.resolve()).bind(
-                        this
-                    );
+                    resultMethods[methodName] = (() => {
+                        const res = Promise.resolve({ $empty: true });
+                        res.$empty = true;
+                        return res;
+                    }).bind(this);
                 } else if (method === "computed" || method === "computed_") {
                     resultMethods[methodName] = (() => {}).bind(this);
                 }
